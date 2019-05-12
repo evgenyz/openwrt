@@ -42,7 +42,6 @@ sub target_config_features(@) {
 		/^virtio$/ and $ret .= "\tselect VIRTIO_SUPPORT\n";
 		/^rootfs-part$/ and $ret .= "\tselect USES_ROOTFS_PART\n";
 		/^boot-part$/ and $ret .= "\tselect USES_BOOT_PART\n";
-		/^testing-kernel$/ and $ret .= "\tselect HAS_TESTING_KERNEL\n";
 	}
 	return $ret;
 }
@@ -84,14 +83,11 @@ sub print_target($) {
 	}
 
 	my $v = kver($target->{version});
-	my $tv = kver($target->{testing_version});
-	$tv or $tv = $v;
 	if (@{$target->{subtargets}} == 0) {
 	$confstr = <<EOF;
 config TARGET_$target->{conf}
 	bool "$target->{name}"
-	select LINUX_$v if !TESTING_KERNEL
-	select LINUX_$tv if TESTING_KERNEL
+	select LINUX_$v
 EOF
 	}
 	else {
@@ -391,18 +387,15 @@ EOF
 
 	my %kver;
 	foreach my $target (@target) {
-		foreach my $tv ($target->{version}, $target->{testing_version}) {
-			next unless $tv;
-			my $v = kver($tv);
-			next if $kver{$v};
-			$kver{$v} = 1;
-			print <<EOF;
+		my $v = kver($target->{version});
+		next if $kver{$v};
+		$kver{$v} = 1;
+		print <<EOF;
 
 config LINUX_$v
 	bool
 
 EOF
-		}
 	}
 	foreach my $def (sort keys %defaults) {
 		print <<EOF;
