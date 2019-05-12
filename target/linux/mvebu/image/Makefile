@@ -15,6 +15,10 @@ KERNEL_LOADADDR := 0x00008000
 
 SIGNATURE:=$(shell printf "%.8s" $(SOURCE_DATE_EPOCH))
 
+define Build/dtb
+	$(call Image/BuildDTB,$(DTS_DIR)/$(DEVICE_DTS).dts,$@.dtb)
+endef
+
 define Build/boot-scr
 	rm -f $@-boot.scr
 	sed -e 's#@ROOT@#$(SIGNATURE)#g' \
@@ -25,7 +29,7 @@ endef
 define Build/boot-img
 	rm -f $@.boot
 	mkfs.fat -C $@.boot $$(( $(CONFIG_TARGET_KERNEL_PARTSIZE) * 1024 ))
-	$(foreach dts,$(DEVICE_DTS), mcopy -i $@.boot $(KDIR)/image-$(dts).dtb ::$(dts).dtb;)
+	$(foreach dts,$(DEVICE_DTS), mcopy -i $@.boot $(DTS_DIR)/$(dts).dtb ::$(dts).dtb;)
 	mcopy -i $@.boot $(IMAGE_KERNEL) ::$(KERNEL_NAME)
 	-mcopy -i $@.boot $@-boot.scr ::boot.scr
 endef
@@ -33,7 +37,7 @@ endef
 define Build/boot-img-ext4
 	rm -fR $@.boot
 	mkdir -p $@.boot
-	$(foreach dts,$(DEVICE_DTS), $(CP) $(KDIR)/image-$(dts).dtb $@.boot/$(dts).dtb;)
+	$(foreach dts,$(DEVICE_DTS), $(CP) $(DTS_DIR)/$(dts).dtb $@.boot;)
 	$(CP) $(IMAGE_KERNEL) $@.boot/$(KERNEL_NAME)
 	-$(CP) $@-boot.scr $@.boot/boot.scr
 	make_ext4fs -J -l $(CONFIG_TARGET_KERNEL_PARTSIZE)M $@.bootimg $@.boot
@@ -66,7 +70,7 @@ define Build/omnia-medkit-initramfs
 	rm -rf $(dir $(IMAGE_KERNEL))boot
 	mkdir -p $(dir $(IMAGE_KERNEL))boot/boot/
 	cp $(KDIR)/zImage-initramfs $(dir $(IMAGE_KERNEL))boot/boot/zImage
-	cp $(KDIR)/image-$(DEVICE_DTS).dtb $(dir $(IMAGE_KERNEL))boot/boot/dtb
+	cp $(DTS_DIR)/$(DEVICE_DTS).dtb $(dir $(IMAGE_KERNEL))boot/boot/dtb
 	$(TAR) -rp --numeric-owner --owner=0 --group=0 --sort=name \
 		$(if $(SOURCE_DATE_EPOCH),--mtime="@$(SOURCE_DATE_EPOCH)") \
 		--file=$@ -C $(dir $(IMAGE_KERNEL))boot/ .
