@@ -7,23 +7,23 @@
 
 get_status_led() {
 	case $(board_name) in
-	linksys,caiman)
+	armada-385-linksys-caiman)
 		status_led="caiman:white:power"
 		;;
-	linksys,cobra)
+	armada-385-linksys-cobra)
 		status_led="cobra:white:power"
 		;;
-	linksys,mamba)
-		status_led="mamba:white:power"
-		;;
-	linksys,rango)
+	armada-385-linksys-rango)
 		status_led="rango:white:power"
 		;;
-	linksys,shelby)
+	armada-385-linksys-shelby)
 		status_led="shelby:white:power"
 		;;
-	linksys,venom)
+	armada-385-linksys-venom)
 		status_led="venom:blue:power"
+		;;
+	armada-xp-linksys-mamba)
+		status_led="mamba:white:power"
 		;;
 	esac
 }
