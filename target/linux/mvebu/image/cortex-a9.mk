@@ -9,15 +9,19 @@
 ifeq ($(SUBTARGET),cortexa9)
 
 define Device/linksys
-  $(Device/NAND-128K)
   DEVICE_TITLE := Linksys $(1)
-  DEVICE_PACKAGES := kmod-mwlwifi swconfig wpad-basic
-  IMAGES += factory.img
+  DEVICE_PACKAGES := kmod-mwlwifi wpad-basic swconfig
+endef
+
+define Device/armada-385-linksys
+  $(Device/NAND-128K)
+  $(Device/UBI-factory)
   KERNEL_SIZE := 6144k
 endef
 
 define Device/linksys-wrt1200ac
   $(call Device/linksys,WRT1200AC (Caiman))
+  $(Device/armada-385-linksys)
   DEVICE_DTS := armada-385-linksys-caiman
   DEVICE_PACKAGES += mwlwifi-firmware-88w8864
 endef
@@ -25,6 +29,7 @@ TARGET_DEVICES += linksys-wrt1200ac
 
 define Device/linksys-wrt1900acv2
   $(call Device/linksys,WRT1900ACv2 (Cobra))
+  $(Device/armada-385-linksys)
   DEVICE_DTS := armada-385-linksys-cobra
   DEVICE_PACKAGES += mwlwifi-firmware-88w8864
 endef
@@ -32,6 +37,7 @@ TARGET_DEVICES += linksys-wrt1900acv2
 
 define Device/linksys-wrt3200acm
   $(call Device/linksys,WRT3200ACM (Rango))
+  $(Device/armada-385-linksys)
   DEVICE_DTS := armada-385-linksys-rango
   DEVICE_PACKAGES += kmod-btmrvl kmod-mwifiex-sdio mwlwifi-firmware-88w8964
 endef
@@ -39,15 +45,17 @@ TARGET_DEVICES += linksys-wrt3200acm
 
 define Device/linksys-wrt1900acs
   $(call Device/linksys,WRT1900ACS (Shelby))
+  $(Device/armada-385-linksys)
   DEVICE_DTS := armada-385-linksys-shelby
   DEVICE_PACKAGES += mwlwifi-firmware-88w8864
 endef
 TARGET_DEVICES += linksys-wrt1900acs
 
 define Device/linksys-wrt32x
-  $(call Device/linksys,WRT32X (Venom))
+$(call Device/linksys,WRT32X (Venom))
   DEVICE_DTS := armada-385-linksys-venom
   DEVICE_PACKAGES += kmod-btmrvl kmod-mwifiex-sdio mwlwifi-firmware-88w8964
+  $(Device/armada-385-linksys)
   KERNEL_SIZE := 3072k
   KERNEL := kernel-bin | append-dtb
 endef
@@ -57,16 +65,18 @@ define Device/linksys-wrt1900ac
   $(call Device/linksys,WRT1900AC (Mamba))
   DEVICE_DTS := armada-xp-linksys-mamba
   DEVICE_PACKAGES += mwlwifi-firmware-88w8864
+  $(Device/NAND-128K)
+  $(Device/UBI-factory)
   KERNEL_SIZE := 3072k
 endef
 TARGET_DEVICES += linksys-wrt1900ac
 
 define Device/openblocks-ax3-4
+  $(Device/UBI-factory)
   DEVICE_DTS := armada-xp-openblocks-ax3-4
   SUPPORTED_DEVICES := $(1)
   BLOCKSIZE := 128k
   PAGESIZE := 1
-  IMAGES += factory.img
   IMAGE/factory.img := append-kernel | pad-to $$(BLOCKSIZE) | append-ubi
   DEVICE_TITLE := Plat'Home OpenBlocks AX3
 endef
@@ -74,33 +84,34 @@ TARGET_DEVICES += openblocks-ax3-4
 
 define Device/armada-385-db-ap
   $(Device/NAND-256K)
-  IMAGES += factory.img
+  $(Device/UBI-factory)
   KERNEL_SIZE := 8192k
   DEVICE_TITLE := Marvell Armada 385 DB AP (DB-88F6820-AP)
 endef
 TARGET_DEVICES += armada-385-db-ap
 
-define Device/armada-370-db
+define Device/marvell-nand
   $(Device/NAND-512K)
-  DEVICE_TITLE := Marvell Armada 370 DB (DB-88F6710-BP-DDR3)
+  DEVICE_TITLE := Marvell Armada $(1)
+endef
+
+define Device/armada-370-db
+	$(call Device/marvell-nand,370 DB (DB-88F6710-BP-DDR3))
 endef
 TARGET_DEVICES += armada-370-db
 
 define Device/armada-370-rd
-  $(Device/NAND-512K)
-  DEVICE_TITLE := Marvell Armada 370 RD (RD-88F6710-A1)
+	$(call Device/marvell-nand,370 RD (RD-88F6710-A1))
 endef
 TARGET_DEVICES += armada-370-rd
 
 define Device/armada-xp-db
-  $(Device/NAND-512K)
-  DEVICE_TITLE := Marvell Armada XP DB (DB-78460-BP)
+	$(call Device/marvell-nand,XP DB (DB-78460-BP))
 endef
 TARGET_DEVICES += armada-xp-db
 
 define Device/armada-xp-gp
-  $(Device/NAND-512K)
-  DEVICE_TITLE := Marvell Armada XP GP (DB-MV784MP-GP)
+	$(call Device/marvell-nand,XP GP (DB-MV784MP-GP))
 endef
 TARGET_DEVICES += armada-xp-gp
 
