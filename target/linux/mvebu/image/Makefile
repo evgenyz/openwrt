@@ -70,6 +70,7 @@ endef
 
 define Device/Default
   PROFILES := Default
+  DEVICE_DTS := $(1)
   BOARD_NAME = $$(DEVICE_DTS)
   KERNEL_NAME := zImage
   KERNEL := kernel-bin | append-dtb | uImage none
