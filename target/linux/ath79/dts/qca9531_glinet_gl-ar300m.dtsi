@@ -99,7 +99,6 @@
 			art: partition@3 {
 				label = "art";
 				reg = <0xff0000 0x010000>;
-				read-only;
 			};
 		};
 	};
