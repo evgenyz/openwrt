@@ -33,33 +33,34 @@ PATCH_DIR:=./patches/$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/toolchain-build.mk
 
-HOST_CONFIGURE_ARGS = \
-	--prefix=$(TOOLCHAIN_DIR) \
-	--build=$(GNU_HOST_NAME) \
-	--host=$(GNU_HOST_NAME) \
-	--target=$(REAL_GNU_TARGET_NAME) \
-	--with-sysroot=$(TOOLCHAIN_DIR) \
-	--enable-deterministic-archives \
-	--enable-plugins \
-	--disable-multilib \
-	--disable-werror \
-	--disable-nls \
-	--disable-sim \
-	--disable-gdb \
-	$(GRAPHITE_CONFIGURE) \
-	$(SOFT_FLOAT_CONFIG_OPTION) \
-	$(call qstrip,$(CONFIG_EXTRA_BINUTILS_CONFIG_OPTIONS))
+BINUTILS_CONFIGURE:= \
+	./configure \
+		--prefix=$(TOOLCHAIN_DIR) \
+		--build=$(GNU_HOST_NAME) \
+		--host=$(GNU_HOST_NAME) \
+		--target=$(REAL_GNU_TARGET_NAME) \
+		--with-sysroot=$(TOOLCHAIN_DIR) \
+		--enable-deterministic-archives \
+		--enable-plugins \
+		--disable-multilib \
+		--disable-werror \
+		--disable-nls \
+		--disable-sim \
+		--disable-gdb \
+		$(GRAPHITE_CONFIGURE) \
+		$(SOFT_FLOAT_CONFIG_OPTION) \
+		$(call qstrip,$(CONFIG_EXTRA_BINUTILS_CONFIG_OPTIONS)) 
 
 ifneq ($(CONFIG_SSP_SUPPORT),)
-  HOST_CONFIGURE_ARGS+= \
+  BINUTILS_CONFIGURE+= \
 		--enable-libssp
 else
-  HOST_CONFIGURE_ARGS+= \
+  BINUTILS_CONFIGURE+= \
 		--disable-libssp
 endif
 
 ifneq ($(CONFIG_EXTRA_TARGET_ARCH),)
-  HOST_CONFIGURE_ARGS+= \
+  BINUTILS_CONFIGURE+= \
 		--enable-targets=$(call qstrip,$(CONFIG_EXTRA_TARGET_ARCH_NAME))-linux-$(TARGET_SUFFIX)
 endif
 
@@ -68,6 +69,12 @@ define Host/Prepare
 	ln -snf $(notdir $(HOST_BUILD_DIR)) $(BUILD_DIR_TOOLCHAIN)/$(PKG_NAME)
 	$(CP) $(SCRIPT_DIR)/config.{guess,sub} $(HOST_BUILD_DIR)/
 	$(SED) 's, " Linaro.*,,' $(HOST_BUILD_DIR)/bfd/version.h
+endef
+
+define Host/Configure
+	(cd $(HOST_BUILD_DIR); \
+		$(BINUTILS_CONFIGURE) \
+	);
 endef
 
 define Host/Compile
